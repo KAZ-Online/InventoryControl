@@ -1,0 +1,73 @@
+import cx_Oracle as cx
+cn=cx.connect('scott/tiger@127.0.0.1/orcl')
+cur=cn.cursor()
+print(cur)
+import datetime
+
+def invoice_header():
+    in_id=int(input("enter the invoice Id: "))
+    InvDt=datetime.datetime.now()
+    header_para1=[in_id,InvDt]
+    
+    #print(header_para)
+    header_ins1='''
+    insert into tbl_sales_invoice_header(InvId,InvDt) values(:InvId,:InvDt)
+    '''
+    cur.execute(header_ins1,header_para1)
+    invoice_details(in_id)
+    
+    ans1=cur.execute('select sum(Discount) from tbl_sales_invoice_details where InvId='+str(in_id))
+    total_price=ans1.fetchone()
+    print("invoice details ",total_price[0])
+    
+    req=input("Press Y/y to enter the header discount")
+    if req=='y' or req=='Y':
+        disc=float(input("enter the discount"))
+    else:
+        disc=0.0
+        
+    header_discount=total_price[0]-disc
+    header_para2=[total_price[0],header_discount,in_id]
+    header_ins2='''
+    update tbl_sales_invoice_header set InvTotalPrice=:InvTotalPrice, InvHeaderDisc=:InvHeaderDisc
+    where InvId=:InvId
+    '''
+    cur.execute(header_ins2,header_para2)
+    cn.commit()
+    header_rec=cur.execute('select * from tbl_sales_invoice_header where InvId='+str(in_id))
+    for r in header_rec:
+        print(r)
+        
+        
+        
+def invoice_details(in_id):
+    #disc=5%
+    InvId=in_id
+    LineNo=int(input("enter the line no. "))
+    P_Id=int(input("enter the product Id"))
+    ans=cur.execute('select ProdSellPrice from tbl_mst_product where ProdId='+str(P_Id))
+    price=ans.fetchone()
+    #print(price)
+    qty=int(input("enter the quantity"))
+    sell_price=price[0]*qty
+    discount=sell_price-0.05*sell_price
+    #total_price=discount
+    inv_para=[InvId,LineNo,P_Id,qty,sell_price,discount]
+    inv_ins='''
+    insert into tbl_sales_invoice_details(InvId,LineNo,ProdId,Quantity,SellPrice,Discount)
+    values(:InvId,:LineNo,:ProdId,:Quantity,:SellPrice,:Discount)
+    '''
+    cur.execute(inv_ins,inv_para)
+    inv_rec=cur.execute('select * from tbl_sales_invoice_details order by InvId ASC')
+    print("Invoice Details table:")
+    for r in inv_rec:
+        print(r)
+    cont=input(" enter y to continue for another line")
+    if cont=='y' or cont=='Y' :
+        invoice_details(in_id)
+ 
+    return()
+    
+
+    
+invoice_header()
