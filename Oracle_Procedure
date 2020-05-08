@@ -15,4 +15,32 @@ is
 begin
     insert into tbl_mst_product(ProdId,ProdName,ProdDesc,ProdQty,ProdPurPrice,ProdPurchDate)
     values(prod_id,prod_name,prod_desc,qty,purch_price,pur_date);
+    commit;
 end proc_insert_product; 
+
+create or replace procedure proc_update_product(prod_id in number,prod_name in varchar, prod_desc in varchar, purch_price in number,qty in number,pur_date in date)
+is
+begin
+    update tbl_mst_product
+    set ProdName=prod_name,
+    ProdDesc=prod_desc, ProdQty=qty, ProdPurPrice=purch_price,ProdPurchDate=pur_date
+    where ProdId=prod_id;
+    commit;
+end proc_update_product; 
+
+create or replace procedure proc_delete_product(prod_id in number)
+is
+begin
+    delete from tbl_mst_product
+    where ProdId=prod_id;
+    commit;
+end proc_delete_product;
+
+create or replace procedure proc_search_product(prod_id in number)
+is
+rec tbl_mst_product%rowtype;
+begin
+    select * into rec from tbl_mst_product
+    where ProdId=prod_id;
+end proc_search_product;
+
