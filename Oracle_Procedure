@@ -1,0 +1,18 @@
+create table tbl_mst_product
+(
+ProdId number(4) primary key,
+ProdName varchar2(100) not null,
+ProdDesc varchar(500) ,
+ProdQty number(3) check (ProdQty >=0),
+ProdPurPrice number(10,3),
+ProdSellPrice as (ProdPurPrice + (ProdPurPrice * .75)),
+ProdPurchDate Date
+);
+
+
+create or replace procedure proc_insert_product(prod_id in number,prod_name in varchar, prod_desc in varchar, purch_price in number,qty in number,pur_date in date)
+is
+begin
+    insert into tbl_mst_product(ProdId,ProdName,ProdDesc,ProdQty,ProdPurPrice,ProdPurchDate)
+    values(prod_id,prod_name,prod_desc,qty,purch_price,pur_date);
+end proc_insert_product; 
